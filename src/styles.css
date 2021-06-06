@@ -52,3 +52,42 @@ html, body{
     outline: none;
     padding: 10px;
 }
+
+/* Datepicker */
+
+.react-datetime-picker input:focus{
+    outline:none;
+
+}
+.react-datetime-picker__wrapper{
+    border: 0px solid grey !important;
+}
+
+
+/* FABs */
+#divbutton{
+    border-radius: 100%;
+    bottom: 25px;
+    font-size: 30px;
+    padding: 25px;
+    position: fixed;
+    right: 25px;
+    display: block;
+}
+.fab{
+    border-radius: 100%;
+    bottom: 25px;
+    font-size: 30px;
+    padding: 25px;
+    position: fixed;
+    right: 25px;
+    display: block;
+
+}
+
+.fab-danger{
+    bottom: 25px;
+    padding: 10px;
+    position: fixed;
+    left: 25px;
+}

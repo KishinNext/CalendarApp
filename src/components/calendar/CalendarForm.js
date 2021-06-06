@@ -1,22 +1,90 @@
-import React from 'react'
+import React, { useState } from 'react'
 import DateTimePicker from 'react-datetime-picker';
+import moment from 'moment'
+import Swal from 'sweetalert2'
+import { useDispatch, useSelector } from 'react-redux';
+import { eventAddNew, eventUpdated } from '../../actions/events';
+import { uiCloseModal } from '../../actions/ui';
 
 
-export const CalendarForm = () => {
+export const CalendarForm = (props) => {
+    const dispatch = useDispatch()
+    const { activeEvent } = useSelector(state => state.calendar)
+    const {notes, title, start, end} = props.formValues;
+    const [titleValid, setTitleValid] = useState(true)
+    const handleInputChane = ({target}) =>{
+        props.setFormValues({
+            ...props.formValues,
+            [target.name]: target.value
+        })
+    }
+    const handleSumbintForm = (e) =>{
+        e.preventDefault()
+        
+        let momnetStart = moment(start)
+        let momnetEnd = moment(end)
+        if (momnetStart.isSameOrAfter(momnetEnd)){
+            Swal.fire(
+                'Error',
+                'La Fecha fin debe de ser mayor que la fecha de inicio',
+                'question'
+              )
+        }
+        if(title.trim().lenght<2){
+            return setTitleValid(false)
+        }
+        //TODO REALIZAR BACKEND
+        if ( activeEvent ){
+            dispatch(eventUpdated(props.formValues))
+        }
+        else{
+            dispatch(eventAddNew({
+                ...props.formValues,
+                id: new Date().getTime()
+            }))
+        }
+        
+
+        dispatch(uiCloseModal())
+
+        props.setFormValues(
+            {
+              title: 'Evento',
+              notes:'',
+              start: props.fecha.toDate(),
+              end: props.fecha.clone().add(1,'hours').toDate(),
+              user:{
+                  _id:'123',
+                  name:'Jairo'
+              }
+            }
+        )
+    }
     return (
         <div>
-            <h1> Nuevo evento </h1>
+            <h1> { !activeEvent ? 'Nuevo evento' : 'Editar evento'} </h1>
             <hr />
-            <form className="container">
+            <form 
+                onSubmit={handleSumbintForm}
+                className="container">
 
                 <div className="form-group">
                     <label>Fecha y hora inicio</label>
-                    <input className="form-control" placeholder="Fecha inicio" />
+                    <DateTimePicker
+                        onChange={props.onChangeDateStart}
+                        value={props.dateStart}
+                        className ='form-control'
+                    />
                 </div>
 
                 <div className="form-group">
                     <label>Fecha y hora fin</label>
-                    <input className="form-control" placeholder="Fecha inicio" />
+                    <DateTimePicker
+                        onChange={props.onChangeDateEnd}
+                        value={props.dateEnd}
+                        className ='form-control'
+                        minDate = { props.dateStart }
+                    />
                 </div>
 
                 <hr />
@@ -24,10 +92,12 @@ export const CalendarForm = () => {
                     <label>Titulo y notas</label>
                     <input 
                         type="text" 
-                        className="form-control"
+                        className= {`form-control ${!titleValid && 'is-invalid'}`}
                         placeholder="Título del evento"
                         name="title"
                         autoComplete="off"
+                        value = {title}
+                        onChange = {handleInputChane}
                     />
                     <small id="emailHelp" className="form-text text-muted">Una descripción corta</small>
                 </div>
@@ -39,6 +109,8 @@ export const CalendarForm = () => {
                         placeholder="Notas"
                         rows="5"
                         name="notes"
+                        value = {notes}
+                        onChange = {handleInputChane}
                     ></textarea>
                     <small id="emailHelp" className="form-text text-muted">Información adicional</small>
                 </div>
